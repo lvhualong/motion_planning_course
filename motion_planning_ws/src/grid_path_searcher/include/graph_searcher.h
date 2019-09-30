@@ -43,7 +43,7 @@ private:
 
 struct GridNode
 {
-	int id; // 1--> open set, -1 --> closed set
+	int id; // 1--> open set, -1 --> closed set　(-1是已经探索过的)
 	Eigen::Vector3d coord;
 	Eigen::Vector3i dir; // direction of expanding
 	Eigen::Vector3i index;
@@ -97,7 +97,7 @@ private:
 	uint8_t *data;
 
 	GridNodePtr ***GridNodeMap;
-	std::multimap<double, GridNodePtr> openSet;
+	std::multimap<double, GridNodePtr> openSet;// map数据结构  key＝cost
 	JPS3DNeib *jn3d;
 
 	bool jump(const Eigen::Vector3i &curIdx, const Eigen::Vector3i &expDir, Eigen::Vector3i &neiIdx);

@@ -284,6 +284,7 @@ inline void gridPathFinder::getSucc(GridNodePtr currentPtr, vector<GridNodePtr> 
     neighborPtrSets.clear();
     edgeCostSets.clear();
     Vector3i neighborIdx;
+    //周围的26个临近节点
     for(int dx = -1; dx < 2; dx++){
         for(int dy = -1; dy < 2; dy++){
             for(int dz = -1; dz < 2; dz++){
@@ -308,6 +309,9 @@ inline void gridPathFinder::getSucc(GridNodePtr currentPtr, vector<GridNodePtr> 
     }
 }
 
+/*
+*   3D　A*算法和　JPS跳点算法
+*/
 void gridPathFinder::graphSearch(Vector3d start_pt, Vector3d end_pt, bool use_jps)
 {   
     ros::Time time_1 = ros::Time::now();    
@@ -344,8 +348,9 @@ void gridPathFinder::graphSearch(Vector3d start_pt, Vector3d end_pt, bool use_jp
     // we only cover 3d case in this project.
     while ( !openSet.empty() ){   
         num_iter ++;
-        currentPtr = openSet.begin() -> second;
+        currentPtr = openSet.begin() -> second;//取出cost最小的node
 
+        //如果当前节点是目标点
         if( currentPtr->index == goalIdx ){
             ros::Time time_2 = ros::Time::now();
 
@@ -356,7 +361,8 @@ void gridPathFinder::graphSearch(Vector3d start_pt, Vector3d end_pt, bool use_jp
             
             gridPath = retrievePath(currentPtr);
             return;
-        }         
+        }  
+        //如果当前节点不是目标点，从open_set中取出，放到close_set       
         openSet.erase(openSet.begin());
         currentPtr -> id = -1; //move current node from open set to closed set.
         expandedNodes.push_back(currentPtr);
