@@ -15,10 +15,10 @@
     <node pkg="grid_path_searcher" type="demo_node" name="demo_node" output="screen" required = "true">
         <remap from="~waypoints" to="/waypoint_generator/waypoints"/>
         <remap from="~map" to="/random_complex/global_map"/>
-        <remap from="~map" to="/random_forest/all_map"/>
+        <!-- <remap from="~map" to="/random_forest/all_map"/> -->
 
         <param name="map/margin" value="0.0" />
-        <param name="map/resolution" value="0.2" />
+        <param name="map/resolution" value="0.2" /> <!-- 地图分辨率 -->
         <param name="map/x_size" value="$(arg map_size_x)"/>
         <param name="map/y_size" value="$(arg map_size_y)"/>
         <param name="map/z_size" value="$(arg map_size_z)"/>
@@ -27,7 +27,7 @@
         <param name="planning/start_y" value="$(arg start_y)"/>
         <param name="planning/start_z" value="$(arg start_z)"/>
     </node>
-<!-- 
+ 
     <node pkg ="grid_path_searcher" name ="random_complex" type ="random_complex" output = "screen">
 
         <param name="init_state_x" value="$(arg start_x)"/>
@@ -37,8 +37,8 @@
         <param name="map/y_size" value="$(arg map_size_y)" />
         <param name="map/z_size" value="$(arg map_size_z)" />
 
-        <param name="map/circle_num" value="40"/>
-        <param name="map/obs_num" value="300"/>
+        <param name="map/circle_num" value="20"/>
+        <param name="map/obs_num" value="150"/>
         <param name="map/resolution" value="0.1"/>
 
         <param name="ObstacleShape/lower_rad" value="0.1"/>
@@ -51,7 +51,8 @@
 
         <param name="sensing/rate" value="0.5"/>
     </node>
-     -->
+    
+  <!-- 
 
     <node pkg ="grid_path_searcher" name ="random_forest" type ="random_forest" output = "screen">
         <remap from="~odometry" to="/odom/fake_odom"/>
@@ -69,7 +70,7 @@
         <param name="sensing/radius" value="15.0"/>
         <param name="sensing/rate" value="1.0"/>
     </node>
-
+  -->
 
     <node pkg="waypoint_generator" name="waypoint_generator" type="waypoint_generator" output="screen">
         <remap from="~goal" to="/goal"/>

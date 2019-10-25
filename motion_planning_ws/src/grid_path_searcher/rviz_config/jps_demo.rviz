@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Status1
+        - /Grid1
         - /Axes1
         - /AllMap1
         - /AllMap1/Autocompute Value Bounds1
@@ -83,7 +84,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.200000003
       Style: Boxes
-      Topic: /demo_node/grid_map_vis
+      Topic: /random_complex/global_map
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -117,7 +118,8 @@ Visualization Manager:
       Marker Topic: /demo_node/grid_path_vis
       Name: gridPath
       Namespaces:
-        {}
+        "": true
+        demo_node/jps_path: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -153,25 +155,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 39.4368858
+      Distance: 22.3384609
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -9.30089474
-        Y: -2.31047869
-        Z: -5.96462996e-06
+        X: -1.164217
+        Y: 6.94761658
+        Z: -5.01095565e-06
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 1.27979696
+      Pitch: 1.48979652
       Target Frame: <Fixed Frame>
       Value: XYOrbit (rviz)
-      Yaw: 3.18287706
+      Yaw: 1.59287488
     Saved:
       - Class: rviz/Orbit
         Distance: 79.2448425

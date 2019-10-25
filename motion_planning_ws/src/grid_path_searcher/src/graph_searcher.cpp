@@ -114,14 +114,39 @@ double gridPathFinder::getManhHeu(GridNodePtr node1, GridNodePtr node2)
 
 double gridPathFinder::getEuclHeu(GridNodePtr node1, GridNodePtr node2)
 {   
-    return (node2->index - node1->index).norm();
+    // return (node2->index - node1->index).norm();
+    double dx = abs(node1->index(0) - node2->index(0));
+    double dy = abs(node1->index(1) - node2->index(1));
+    double dz = abs(node1->index(2) - node2->index(2));
+
+    return sqrt(dx*dx + dy*dy + dz*dz);
 }
 
 double gridPathFinder::getHeu(GridNodePtr node1, GridNodePtr node2)
+{   
+    return getEuclHeu(node1, node2);
+}
+
+double gridPathFinder::getHeu(GridNodePtr node1, GridNodePtr node2, char style)
 {
-    return tie_breaker * getDiagHeu(node1, node2);
+    if(style == 0)// Dijkstar
+        return 0;
+
+    else if(style == 1)// Manhattan
+        return getManhHeu(node1, node2);
+    
+    else if(style == 2)// Euclar
+        return tie_breaker*getEuclHeu(node1, node2);
+        
+    else if(style == 3)// Diagonal
+        return getDiagHeu(node1, node2);
+
+    else // // Diagonal with tie_bireaker
+        return tie_breaker * getDiagHeu(node1, node2);
     //return getEuclHeu(node1, node2);
 }
+
+
 
 vector<GridNodePtr> gridPathFinder::retrievePath(GridNodePtr current)
 {   
@@ -312,7 +337,7 @@ inline void gridPathFinder::getSucc(GridNodePtr currentPtr, vector<GridNodePtr> 
 /*
 *   3D　A*算法和　JPS跳点算法
 */
-void gridPathFinder::graphSearch(Vector3d start_pt, Vector3d end_pt, bool use_jps)
+void gridPathFinder::graphSearch(Vector3d start_pt, Vector3d end_pt, bool use_jps, char style)
 {   
     ros::Time time_1 = ros::Time::now();    
     debugNodes.clear();
@@ -334,13 +359,13 @@ void gridPathFinder::graphSearch(Vector3d start_pt, Vector3d end_pt, bool use_jp
     GridNodePtr currentPtr  = NULL;
 
     startPtr -> gScore = 0;
-    startPtr -> fScore = getHeu(startPtr, endPtr);
+    startPtr -> fScore = getHeu(startPtr, endPtr, style);
     startPtr -> id = 1; //put start node in open set
     startPtr -> coord = start_pt;
     openSet.insert( make_pair(startPtr -> fScore, startPtr) ); //put start in open set
 
     double tentative_gScore;
-
+    double jps_lookAhead_t = 0;
     int num_iter = 0;
     vector<GridNodePtr> neighborPtrSets;
     vector<double> edgeCostSets;
@@ -355,7 +380,7 @@ void gridPathFinder::graphSearch(Vector3d start_pt, Vector3d end_pt, bool use_jp
             ros::Time time_2 = ros::Time::now();
 
             if( use_jps )
-                ROS_WARN("[JPS]{sucess} Time in JPS is %f ms, path cost if %f m", (time_2 - time_1).toSec() * 1000.0, currentPtr->gScore * resolution );
+                ROS_WARN("[JPS]{sucess} Time in JPS is %f ms, look_ahead: %f ms, path cost if %f m", (time_2 - time_1).toSec() * 1000.0, jps_lookAhead_t, currentPtr->gScore * resolution );
             else
                 ROS_WARN("[A*]{sucess}  Time in A*  is %f ms, path cost if %f m", (time_2 - time_1).toSec() * 1000.0, currentPtr->gScore * resolution );
             
@@ -370,7 +395,11 @@ void gridPathFinder::graphSearch(Vector3d start_pt, Vector3d end_pt, bool use_jp
         if(!use_jps)
             getSucc(currentPtr, neighborPtrSets, edgeCostSets);
         else
+        {
+            ros::Time time_3 = ros::Time::now();
             getJpsSucc(currentPtr, neighborPtrSets, edgeCostSets, num_iter);
+            jps_lookAhead_t += (ros::Time::now()-time_3).toSec()*1000.0;
+        }
 
         for(int i = 0; i < (int)neighborPtrSets.size(); i++){
             neighborPtr = neighborPtrSets[i];
@@ -384,14 +413,14 @@ void gridPathFinder::graphSearch(Vector3d start_pt, Vector3d end_pt, bool use_jp
                 neighborPtr -> id        = 1;
                 neighborPtr -> cameFrom  = currentPtr;
                 neighborPtr -> gScore    = tentative_gScore;
-                neighborPtr -> fScore    = neighborPtr -> gScore + getHeu(neighborPtr, endPtr); 
+                neighborPtr -> fScore    = neighborPtr -> gScore + getHeu(neighborPtr, endPtr, style); 
                 neighborPtr -> nodeMapIt = openSet.insert( make_pair(neighborPtr->fScore, neighborPtr) ); //put neighbor in open set and record it.
                 continue;
             }
             else if(tentative_gScore <= neighborPtr-> gScore){ //in open set and need update
                 neighborPtr -> cameFrom = currentPtr;
                 neighborPtr -> gScore = tentative_gScore;
-                neighborPtr -> fScore = tentative_gScore + getHeu(neighborPtr, endPtr); 
+                neighborPtr -> fScore = tentative_gScore + getHeu(neighborPtr, endPtr, style); 
                 openSet.erase(neighborPtr -> nodeMapIt);
                 neighborPtr -> nodeMapIt = openSet.insert( make_pair(neighborPtr->fScore, neighborPtr) ); //put neighbor in open set and record it.
 

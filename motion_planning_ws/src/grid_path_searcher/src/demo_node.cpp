@@ -50,7 +50,7 @@ void visGridPath(vector<Vector3d> &nodes, bool is_use_jps);
 void visCloseNode(vector<Vector3d> nodes);
 void visOpenNode(vector<Vector3d> nodes);
 void visCloseNodeSequence(vector<Vector3d> nodes);
-void displaySphereList(vector<Vector3d> & list, double resolution, Vector4d color, int id);
+void displaySphereList(vector<Vector3d> &list, double resolution, Vector4d color, int id);
 void pathFinding(const Vector3d start_pt, const Vector3d target_pt); //待补充
 
 void rcvWaypointsCallback(const nav_msgs::Path &wp)
@@ -62,15 +62,45 @@ void rcvWaypointsCallback(const nav_msgs::Path &wp)
     target_pt << wp.poses[0].pose.position.x,
         wp.poses[0].pose.position.y,
         wp.poses[0].pose.position.z;
+    ROS_INFO("receive the way-points");
 
-    ROS_INFO("[jps_node] receive the way-points");
-    _path_finder->graphSearch(_start_pt, target_pt, true);
-    vector<Vector3d> path_jps = _path_finder->getPath();
-    // visGridPath(path_jps, true);
-    displaySphereList(path_jps, _resolution, Eigen::Vector4d(1, 0, 0, 1.0), 1);
+    ROS_INFO("Dijkstar");
+    _path_finder->graphSearch(_start_pt, target_pt, false, 0);
+    _path_finder->getVisitedNodes();
     _path_finder->resetUsedGrids();
 
-    _path_finder->graphSearch(_start_pt, target_pt, false);
+    ROS_INFO("Manhattan");
+    _path_finder->graphSearch(_start_pt, target_pt, false, 1);
+    _path_finder->getVisitedNodes();
+    _path_finder->resetUsedGrids();
+
+    ROS_INFO("Eular");
+    _path_finder->graphSearch(_start_pt, target_pt, false, 2);
+    _path_finder->getVisitedNodes();
+    _path_finder->resetUsedGrids();
+
+    ROS_INFO("Diag");
+    _path_finder->graphSearch(_start_pt, target_pt, false, 3);
+    _path_finder->getVisitedNodes();
+    _path_finder->resetUsedGrids();
+
+    ROS_INFO("Diag with tie_break");
+    _path_finder->graphSearch(_start_pt, target_pt, false, 4);
+    _path_finder->getVisitedNodes();
+    _path_finder->resetUsedGrids();
+
+    ROS_INFO("JPS Diag with tie_break");
+    _path_finder->graphSearch(_start_pt, target_pt, true, 4);
+    vector<Vector3d> path_jps = _path_finder->getPath();
+    _path_finder->getVisitedNodes();
+    visGridPath(path_jps, true);
+    // displaySphereList(path_jps, _resolution, Eigen::Vector4d(1, 0, 0, 1.0), 1);
+    _path_finder->resetUsedGrids();
+
+
+    ROS_INFO("A* Diag with tie_break");
+    _path_finder->graphSearch(_start_pt, target_pt, false, 4);
+    _path_finder->getVisitedNodes();
     vector<Vector3d> path_astar = _path_finder->getPath();
     // visGridPath(path_astar, false);
     displaySphereList(path_astar, _resolution, Eigen::Vector4d(0, 1, 0, 1.0), 2);
@@ -253,8 +283,8 @@ void visGridPath(vector<Vector3d> &nodes, bool is_use_jps)
     else
         node_vis.ns = "demo_node/astar_path";
 
-    node_vis.type = visualization_msgs::Marker::CUBE_LIST;//
-    node_vis.action = visualization_msgs::Marker::ADD;//
+    node_vis.type = visualization_msgs::Marker::CUBE_LIST; //
+    node_vis.action = visualization_msgs::Marker::ADD;     //
     node_vis.id = 0;
 
     node_vis.pose.orientation.x = 0.0;
@@ -294,27 +324,27 @@ void visGridPath(vector<Vector3d> &nodes, bool is_use_jps)
 
     _grid_path_vis_pub.publish(node_vis);
 }
-void displaySphereList(vector<Vector3d> & list, double resolution, Vector4d color, int id)
+void displaySphereList(vector<Vector3d> &list, double resolution, Vector4d color, int id)
 {
-  visualization_msgs::Marker mk;
-  mk.header.frame_id = "world";
-  mk.header.stamp = ros::Time::now();
-  mk.type = visualization_msgs::Marker::SPHERE_LIST;
-  mk.action = visualization_msgs::Marker::DELETE;
-  mk.id = id;
-  _grid_path_vis_pub.publish(mk);
+    visualization_msgs::Marker mk;
+    mk.header.frame_id = "world";
+    mk.header.stamp = ros::Time::now();
+    mk.type = visualization_msgs::Marker::SPHERE_LIST;
+    mk.action = visualization_msgs::Marker::DELETE;
+    mk.id = id;
+    _grid_path_vis_pub.publish(mk);
 
-  mk.action = visualization_msgs::Marker::ADD;
-  mk.pose.orientation.x = 0.0, mk.pose.orientation.y = 0.0, mk.pose.orientation.z = 0.0, mk.pose.orientation.w = 1.0;
-  mk.color.r = color(0), mk.color.g = color(1), mk.color.b = color(2), mk.color.a = color(3);
-  mk.scale.x = resolution, mk.scale.y = resolution, mk.scale.z = resolution;
-  geometry_msgs::Point pt;
-  for (int i = 0; i < int(list.size()); i++)
-  {
-    pt.x = list[i](0), pt.y = list[i](1), pt.z = list[i](2);
-    mk.points.push_back(pt);
-  }
-  _grid_path_vis_pub.publish(mk);
+    mk.action = visualization_msgs::Marker::ADD;
+    mk.pose.orientation.x = 0.0, mk.pose.orientation.y = 0.0, mk.pose.orientation.z = 0.0, mk.pose.orientation.w = 1.0;
+    mk.color.r = color(0), mk.color.g = color(1), mk.color.b = color(2), mk.color.a = color(3);
+    mk.scale.x = resolution, mk.scale.y = resolution, mk.scale.z = resolution;
+    geometry_msgs::Point pt;
+    for (int i = 0; i < int(list.size()); i++)
+    {
+        pt.x = list[i](0), pt.y = list[i](1), pt.z = list[i](2);
+        mk.points.push_back(pt);
+    }
+    _grid_path_vis_pub.publish(mk);
 }
 
 void visCloseNode(vector<Vector3d> nodes)

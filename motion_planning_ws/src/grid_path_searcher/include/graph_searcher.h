@@ -77,6 +77,7 @@ private:
 	double getManhHeu(GridNodePtr node1, GridNodePtr node2);
 	double getEuclHeu(GridNodePtr node1, GridNodePtr node2);
 	double getHeu(GridNodePtr node1, GridNodePtr node2);
+	double getHeu(GridNodePtr node1, GridNodePtr node2, char style);
 
 	std::vector<GridNodePtr> retrievePath(GridNodePtr current);
 
@@ -129,7 +130,7 @@ public:
 	void initGridMap(double _resolution, Eigen::Vector3d global_xyz_l, Eigen::Vector3d global_xyz_u, int max_x_id, int max_y_id, int max_z_id);
 	void setObs(const double coord_x, const double coord_y, const double coord_z);
 
-	void graphSearch(Eigen::Vector3d start_pt, Eigen::Vector3d end_pt, bool use_jps = false);
+	void graphSearch(Eigen::Vector3d start_pt, Eigen::Vector3d end_pt, bool use_jps = false, char style=3);
 	void resetGrid(GridNodePtr ptr);
 	void resetUsedGrids();
 
